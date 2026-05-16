@@ -17,7 +17,7 @@ class DashboardController extends Controller
         $livresDisponibles = Livre::where('is_reserved', false)->count();
         $livresReserves = Livre::where('is_reserved', true)->count();
         //    le nombre de reservation par lecteur
-        $reservationLecteur =  Reservation::select('lecteur_id', DB::raw('count(*) as total'))
+        $reservationLecteur =  Reservation::where('etat',true)->select('lecteur_id', DB::raw('count(*) as total'))
             ->groupBy('lecteur_id')
             ->get();
         return response()->json([

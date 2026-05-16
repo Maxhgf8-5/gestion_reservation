@@ -4,7 +4,6 @@ import api from "../api";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 const Livre = () => {
-
   // initailisation des state
   const [livres, setLivre] = useState([]);
 
@@ -25,11 +24,9 @@ const Livre = () => {
   const [search, setSearch] = useState("");
   const [annee, setAnnee] = useState("");
 
+  // fin  init state
 
-// fin  init state 
-
-
-  // chargement d'affichage 
+  // chargement d'affichage
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       if (search.trim() !== "" || annee.trim() !== "") {
@@ -55,11 +52,11 @@ const Livre = () => {
           });
         });
       }
-    }, 500); 
+    }, 500);
     return () => clearTimeout(delayDebounce);
   }, [search, annee, page]);
 
-  // saisi de formulaire 
+  // saisi de formulaire
   const handleChange = (e) => {
     setFilters({ ...filters, [e.target.name]: e.target.value });
 
@@ -81,16 +78,15 @@ const Livre = () => {
       }
       // Mettre à jour   le nouveu produit
       setLivre((prev) => [...prev, res.data.livre]);
-      await api.get(`/livre?page=${page}&per_page=4`).then((r) => 
-        setLivre(r.data.livres.data)
-       
-    );
-      await api.get(`/livre?page=${page}&per_page=4`).then((r) => 
-       setPagination({
+      await api
+        .get(`/livre?page=${page}&per_page=4`)
+        .then((r) => setLivre(r.data.livres.data));
+      await api.get(`/livre?page=${page}&per_page=4`).then((r) =>
+        setPagination({
           current: r.data.livres.current_page,
           last: r.data.livres.last_page,
-        })
-    );
+        }),
+      );
       // Réinitialiser le formulaire
       setFormData({
         titre: "",
@@ -108,21 +104,21 @@ const Livre = () => {
       }
     }
   };
-  // function pour supprimer un livre 
+  // function pour supprimer un livre
   const supprimerLivre = async (id) => {
     const confirmation = window.confirm(
       "Voulez-vous vraiment supprimer ce livre ?",
     );
-    if (!confirmation) return;  
+    if (!confirmation) return;
 
     try {
       const res = await api.delete(`/livre/delete/${id}`);
-  await api.get(`/livre?page=${page}&per_page=4`).then((r) => 
-       setPagination({
+      await api.get(`/livre?page=${page}&per_page=4`).then((r) =>
+        setPagination({
           current: r.data.livres.current_page,
           last: r.data.livres.last_page,
-        })
-    );
+        }),
+      );
       // msg backd
 
       setMessage(res.data.message);
@@ -210,7 +206,7 @@ const Livre = () => {
               </div>
 
               <button type="submit" class="btn btn-primary">
-               {idEdit? 'Mis à jour':'Envoyer'} 
+                {idEdit ? "Mis à jour" : "Envoyer"}
               </button>
             </form>
           </div>
@@ -225,16 +221,12 @@ const Livre = () => {
                   className="form-control"
                   placeholder="Rechercher nom auteur ou titre"
                 />
-                <select
-                  className="form-select"
+              <input type="text"
+                  className="form-control"
+                  placeholder="Rechercher par année publication"
                   value={annee}
-                  onChange={(e) => setAnnee(e.target.value)}
-                >
-                  <option value="">Toutes les années</option>
-                  <option value="2024">2024</option>
-                  <option value="2025">2025</option>
-                  <option value="2026">2026</option>
-                </select>
+                  onChange={(e) => setAnnee(e.target.value)}/>
+               
               </div>
 
               <br />

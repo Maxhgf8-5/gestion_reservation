@@ -27,17 +27,21 @@ class LivreController extends Controller
         Log::info("LivreController index called with search: $search and date_publication: " . $request->query('date_publication'));
 
         // l'ensemble des livres 
+        
+
         $query = Livre::query()
+            ->when($annee, function ($q) use ($annee) {
+                $q->where('annee_publication' , $annee);
+            })
             ->when($search, function ($q) use ($search) {
                 $searchLower = strtolower($search);
 
-                $q->whereRaw('LOWER(titre) LIKE ?', ["%{$searchLower}%"])
-                    ->orWhereRaw('LOWER(auteur) LIKE ?', ["%{$searchLower}%"]);
-            })->when($annee, function ($q) use ($annee) {
-                $q->where('annee_publication', $annee);
+                $q->where(function ($sub) use ($searchLower) {
+                    $sub->whereRaw('LOWER(titre) LIKE ?', ["%{$searchLower}%"])
+                        ->orWhereRaw('LOWER(auteur) LIKE ?', ["%{$searchLower}%"]);
+                });
             })
             ->orderBy('created_at', 'desc');
-
 
         $livres = $query->paginate($request->input('per_page', 4))
             ->through(function ($livre) {
@@ -61,14 +65,14 @@ class LivreController extends Controller
         $validatedData = $request->validate([
             'titre' => 'required|string|max:255',
             'auteur' => 'required',
-            'annee_publication' => 'required|string',
+            'annee_publication' => 'required|integer',
         ]);
         $validatedData['is_reserved'] = false;
         try {
             $livre = Livre::create($validatedData);
             return response()->json([
                 'livre' => $livre,
-                'message' => 'Nouveau lecteur ajouté'
+                'message' => 'Nouveau livre ajouté'
             ], 201);
         } catch (Exception $th) {
             Log::info($th->getMessage());
