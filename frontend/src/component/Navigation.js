@@ -1,32 +1,37 @@
-import React, { Children, useRef, useState } from "react";
+import React, { Children, useEffect, useRef, useState } from "react";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
+import "../css/style.scss";
 
 const Navigation = ({children}) => {
   const [collapsed, setCollapsed] = useState(false);
-  const sidebarRef = useRef(null);
-  const menuRef = useRef(null);
+  const sidebarRef = useRef(null); 
 
-  const toggleSidebar = () => {
+   const toggleSidebar = () => {
     const newState = !collapsed;
     setCollapsed(newState);
+    localStorage.setItem("sidebarCollapsed", JSON.stringify(newState));
   };
+   useEffect(() => {
+    const saved = localStorage.getItem("sidebarCollapsed");
+    if (saved !== null) {
+      setCollapsed(saved === "true");
+    }
+  }, []);
   return (
-    <div>
-      <div className="d-flex">
-        {/* Sidebar */}
+    <>
+      <div className="app"> 
+        
         <Sidebar ref={sidebarRef} collapsed={collapsed} />
-
-        {/* Main content */}
-        <div className="flex-grow-1">
-          <Header  ref={menuRef}
-          
+ 
+        <div className="main-wrapper">
+          <Header 
             toggleSidebar={toggleSidebar}/>
 
-          <div className="p-4">{children}</div>
+          <main className="content">{children}</main>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

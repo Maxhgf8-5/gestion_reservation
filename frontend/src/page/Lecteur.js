@@ -5,13 +5,14 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 
 const Lecteur = () => {
   const [lecteurs, setLecteurs] = useState([]);
-   
+
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    nom: "",
+    name: "",
     email: "",
   });
+  const [status, setStatus] = useState(1);
   const [message, setMessage] = useState(null);
   const { idEdit } = useParams();
   useEffect(() => {
@@ -21,13 +22,17 @@ const Lecteur = () => {
   }, []);
 
   const handleChange = (e) => {
-
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
-
+  const initialiserForm = () => {
+    setFormData({
+      name: "",
+      email: "",
+    });
+  };
   // Ajouter un produit
   const ajouterLecteur = async (e) => {
     e.preventDefault();
@@ -43,18 +48,27 @@ const Lecteur = () => {
       await api.get(`/lecteur`).then((r) => setLecteurs(r.data.lecteurs));
       // Réinitialiser le formulaire
       setFormData({
-        nom: "",
+        name: "",
         email: "",
       });
       setMessage(res.data.message);
+      setTimeout(() => setErrors({}), 4000);
       setTimeout(() => setMessage(null), 5000);
-      navigate('/lecteur');
+      setStatus(1);
+      navigate("/lecteur");
     } catch (error) {
-      setMessage("Le mail existe déjà !");
-      setTimeout(() => setMessage(null), 5000);
-       if (error.response && error.response.status === 422) {
-        // Laravel renvoie les erreurs de validation dans error.response.data.errors
-        setErrors(error.response.data.errors);
+      if (error.response) {
+        setTimeout(() => setMessage(null), 5000);
+        setTimeout(() => setErrors(null), 5000);
+        if (error.response.status === 422) {
+          setErrors(error.response.data.errors);
+        } else {
+          setMessage(error.response.data.message);
+          setStatus(0);
+        }
+      } else {
+        setTimeout(() => setMessage(null), 5000);
+        setMessage("Erreur de connexion au serveur");
       }
     }
   };
@@ -67,12 +81,25 @@ const Lecteur = () => {
     try {
       const res = await api.delete(`/lecteur/delete/${id}`);
       // Récupérer le message du backend
-      setMessage(res.data.message);
       setLecteurs((prev) => prev.filter((lecteur) => lecteur.id !== id));
+      setStatus(res.data.status);
+      setMessage(res.data.message);
+      setTimeout(() => setErrors({}), 4000);
       setTimeout(() => setMessage(null), 5000);
     } catch (error) {
-      setMessage("Erreur lors de la suppression !");
-      setTimeout(() => setMessage(null), 5000);
+      if (error.response) {
+        setTimeout(() => setMessage(null), 5000);
+        setTimeout(() => setErrors(null), 5000);
+        if (error.response.status === 422) {
+          setErrors(error.response.data.errors);
+        } else {
+          setMessage(error.response.data.message);
+          setStatus(0);
+        }
+      } else {
+        setTimeout(() => setMessage(null), 5000);
+        setMessage("Erreur de connexion au serveur");
+      }
     }
   };
   // function pour recharger le lecteur a editer
@@ -89,94 +116,188 @@ const Lecteur = () => {
   return (
     <div>
       <Navigation>
-        <div className="d-flex">
-          <div class="container my-5">
-            {message && <div className="alert alert-info">{message}</div>}
-
-            <h3 class="mb-4">Ajouter un lecteur</h3>
-            <form onSubmit={ajouterLecteur}>
-              {/* <form> */}
-              <div class="mb-3">
-                <label for="nom" class="form-label">
-                  Nom complet
-                </label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="nom"
-                  onChange={handleChange}
-                  value={formData.nom}
-                  name="nom"
-                  placeholder="Entrez votre nom"
-                />
-                {errors.nom && <span style={{ color: 'red' }}>{errors.nom[0]}</span>}
-              </div>
-              <div class="mb-3">
-                <label for="email" class="form-label">
-                  Adresse email
-                </label>
-                <input
-                  type="email"
-                  class="form-control"
-                  id="email"
-                  onChange={handleChange}
-                  value={formData.email}
-                  name="email"
-                  placeholder="exemple@mail.com"
-                />
-                {errors.email && <span style={{ color: 'red' }}>{errors.email[0]}</span>}
-              </div>
-
-              <button type="submit" class="btn btn-primary">
-               {idEdit?'Mis à jour':'Envoyer'} 
+        <div className="page" id="page-commandes">
+          {message && (
+            <div
+              style={{
+                position: "fixed", // fixé à l’écran
+                top: "40px", // marge en haut
+                right: "20px", // marge à droite
+                background: "#fff", // fond blanc pour contraste
+                color: "#333", // texte sombre
+                padding: "24px 50px",
+                borderRadius: "8px",
+                boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+                borderLeft: `6px solid ${status === 1 ? "green" : "red"}`,
+                maxWidth: "400px",
+                zIndex: "10001",
+              }}
+            >
+              {message}
+            </div>
+          )}
+          {/* Header */}
+          <div className="page-header">
+            <div className="ph-left">
+              <h1>Lecteurs</h1>
+              <p>Suivi et gestion des lecteura.</p>
+            </div>
+            <div className="ph-actions">
+              <button className="btn btn-primary">
+                <svg
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                Nouveau Lecteur
               </button>
-            </form>
+            </div>
           </div>
-          <div class="container my-5">
-            <h3 class="mb-4">Liste des lecteurs</h3>
-            <table class="table table-striped table-bordered table-hover">
-              <thead class="table-dark">
-                <tr>
-                  <th>#</th>
-                  <th>Nom</th>
-                  <th>Email</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {lecteurs && lecteurs.length > 0 ? (
-                  lecteurs.map((l) => (
-                    <tr key={l.id}>
-                      <td>{l.id}</td>
-                      <td>{l.nom}</td>
-                      <td>{l.email}</td>
-                      <td>
-                        <div class="d-flex gap-2">
-                          <Link
-                            class="btn btn-warning btn-sm"
-                            to={`/lecteur/edit/${l.idEncrypted}`}
-                          >
-                            <i class="bi bi-pencil"></i>{" "}
-                          </Link>
-                          <button
-                            onClick={() => supprimerLecteur(l.id)}
-                            class="btn btn-danger btn-sm"
-                          >
-                            <i class="bi bi-trash"></i>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td style={{ textAlign: "center" }} colSpan="4">
-                      Aucun lecteur dans votre base de donnée
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+
+          <div className="grid-cols-2-3 mb-24">
+            {/* Formulaire */}
+            <div className="card">
+              <div className="card-header">
+                <div className="card-title">Ajouter un lecteur</div>
+              </div>
+              <div className="card-body">
+                <form onSubmit={ajouterLecteur}>
+                  <div className="form-grid">
+                    <div class="form-group form-full">
+                      <label for="nom" class="form-label">
+                        Nom complet
+                      </label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="nom"
+                        onChange={handleChange}
+                        value={formData.name}
+                        name="name"
+                        placeholder="Entrez votre nom"
+                      />
+                      {errors?.name && (
+                        <span style={{ color: "red" }}>{errors?.name[0]}</span>
+                      )}
+                    </div>
+
+                    <div class="form-group">
+                      <label for="email" class="form-label">
+                        Adresse email
+                      </label>
+                      <input
+                        type="email"
+                        class="form-control"
+                        id="email"
+                        onChange={handleChange}
+                        value={formData.email}
+                        name="email"
+                        placeholder="exemple@mail.com"
+                      />
+                      {errors?.email && (
+                        <span style={{ color: "red" }}>{errors?.email[0]}</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="form-actions">
+                    <button
+                      type="button"
+                      onClick={initialiserForm}
+                      className="btn btn-outline"
+                    >
+                      Réinitialiser
+                    </button>
+                    <button type="submit" className="btn btn-primary">
+                      <svg
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M3 3h2l.4 2M7 13h10l4-8H5.4"
+                        />
+                      </svg>
+                      {idEdit ? "Mis à jour" : " Créer"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            {/* Commandes récentes */}
+            <div className="card">
+              <div className="card-header">
+                <div className="card-title">Liste Lecteurs</div>
+              </div>
+              <div className="card-body">
+                <div className="orders-list">
+                  <div className="card-body" style={{ padding: 0 }}>
+                    <div
+                      className="table-wrapper"
+                      style={{
+                        border: "none",
+                        borderRadius: "0 0 var(--radius-lg) var(--radius-lg)",
+                        boxShadow: "none",
+                      }}
+                    >
+                      <table style={{ width: "100%" }}>
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>Nom</th>
+                            <th>Email</th>
+                            <th>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {lecteurs && lecteurs.length > 0 ? (
+                            lecteurs.map((l) => (
+                              <tr key={l.id}>
+                                <td>{l.id}</td>
+                                <td>{l.name}</td>
+                                <td>{l.email}</td>
+                                <td>
+                                  <div className="td-actions">
+                                    <Link
+                                      to={`/lecteur/edit/${l.idEncrypt}`}
+                                      className="btn btn-success btn-sm"
+                                    >
+                                      <i className="bi bi-pencil"></i>
+                                    </Link>{" "}
+                                    <button
+                                      onClick={() => supprimerLecteur(l.id)}
+                                      class="btn btn-danger btn-sm"
+                                    >
+                                      <i class="bi bi-trash"></i>
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td style={{ textAlign: "center" }} colSpan="4">
+                                Aucun lecteur dans votre base de donnée
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </Navigation>

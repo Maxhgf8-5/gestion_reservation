@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Lecteur;
 use App\Models\Livre;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -20,7 +22,16 @@ class DashboardController extends Controller
         $reservationLecteur =  Reservation::where('etat',true)->select('lecteur_id', DB::raw('count(*) as total'))
             ->groupBy('lecteur_id')
             ->get();
+            $lecteur=Lecteur::count();
+            // livre reserve par un user 
+            $auth=Auth::user();
+            $reservationLecteurCount=Reservation::where('lecteur_id',$auth->lecteur->id)->count();
+            $reservationLecteurAnnul=Reservation::where('lecteur_id',$auth->lecteur->id)->where('etat',false)->count();
+            Log::info($reservationLecteurAnnul);
         return response()->json([
+            'lecteur'=>$lecteur,
+            'reservationLecteurCount'=>$reservationLecteurCount,
+            'reservationLecteurAnnul'=>$reservationLecteurAnnul,
             'livresDisponibles' => $livresDisponibles,
             'livresReserves' => $livresReserves,
             'reservationLecteur' => $reservationLecteur->load(['lecteur','livre'])
