@@ -72,7 +72,7 @@ class LecteurController extends Controller
                 [
                     'status' => 1,
                     'lecteur' => $lecteur,
-                    'message' => 'Nouveau lecteur ajouté'
+                    'message' => 'Nouveau lecteur ajouté,Un email avec les données de connexion a été envoyé au lecteur!!'
                 ],
                 201
             );

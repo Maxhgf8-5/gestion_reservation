@@ -1,15 +1,17 @@
 <<<<<<< HEAD
-# gestion_reservation
-une app web de reservation de livres (laravel+react)
-=======
-**System de gestion des reservations**
-*Application fullstack - Backend laravel / Frontend React /PostgreSql*
 
-**_Structure du projet__*
+# gestion_reservation
+
+# une app web de reservation de livres (laravel+react)
+
+**System de gestion des reservations**
+_Application fullstack - Backend laravel / Frontend React /PostgreSql_
+
+\*\_\_Structure du projet\_\_\_
 
 gestion_reservation--->back(api rest laravel 10)+front (react)
 
-**_Outils technique_*
+\*_*Outils technique*_
 
 **avoir installer :**
 
@@ -19,12 +21,8 @@ postgreSql
 git
 
 **_Base de donnee_**
- creer une base de donnee (gestion_bibliotheque)
- 1-dans le terminal (windows) taper les commande
- -`set  PGPASSWORD=votre mot_de_passe`
--`psql -h localhost -p le_port(5432 par defaut) -U postgres(le username par defaut)`
--`create database "gestion_bibliotheque"`
--`\l` pour voir la DB creer
+creer une base de donnee (gestion_bibliotheque)
+1-dans le terminal (windows) taper les commande -`set  PGPASSWORD=votre mot_de_passe` -`psql -h localhost -p le_port(5432 par defaut) -U postgres(le username par defaut)` -`create database "gestion_bibliotheque"` -`\l` pour voir la DB creer
 
 **_Installer laravel_**
 faire `cd backend` puis `cd GestionBiblio` et taper
@@ -42,12 +40,9 @@ faire `cd backend` puis `cd GestionBiblio` et taper
 `php artisan migrate --seed`
 `php artisan serve`
 
-normalement il tourne sur le ***localhost:8000***
+normalement il tourne sur le **_localhost:8000_**
 
-
-*******Installer le front******
-
-
+**\*\*\***Installer le front**\*\***
 
 dans le terminal `cd frontent`, `cd mon-projet`
 creer un fichier .env a la racine du dossier mon-projet s'il existe pas , coller ce code
@@ -55,30 +50,35 @@ creer un fichier .env a la racine du dossier mon-projet s'il existe pas , coller
 puis un autre fichier api.js dans src s'il n'existe pas et coller :
 **import axios from "axios";**
 **const api = axios.create({**
-  **baseURL: process.env.REACT_APP_API_URL + "/api",** // 
+**baseURL: process.env.REACT_APP_API_URL + "/api",** //
 **});**
 
 **export default api;**
-***NB***: vous devez installer le dom-router et axios
+**_NB_**: vous devez installer le dom-router et axios
 taper npm start puis lancer le server
 il va normalement tourner sur du localhost:3000
 
-*****Stack technique***
+**\***Stack technique**\*
 il s'agit d'une app web de gestion de reservation de livre
 -techonologie utilisé:
-**Backend**:laravel
+**Backend\*\*:laravel
 c'est un frame php rapide a developper ,car il fournit un routing, des orm ,des validation, il a une arhitecture tres simple MVC, avec une manipulation simple avec la BD sans ecrire des requete sql brute, tres securisé , il est pratique pour des cas d'API rest : Notre cas
 
-**Front**: React 
+**Front**: React
 une librairie js avec une interface dynamique , sans recharger la page il arrive a mettre a jours ces composents qui sont d'ailleur reuitiisable . une experience utilisateur tres fluide
 
 **Base de D**: PostgreSql
 robuste fiable pour des donnée relationnelle comme notre cas ,tres performant en requete complexe, gratuit et est supporter par laravel
 
- 
+Exercice
 
+Le probleme avec ce code est juste le meme livre va etre reservé 2 fois , puisque le programme verifie bien si le livre choisi est disponible ou pas , mais l'action de verification et d'ajout sont pas proteger ce qui fait que si 2 requete vienne au meme moment , elle vont s'executer toute 2 au meme moment . pour eviter ca en laravel on peut une utiliser la function transaction fournit par DB
 
- Exercice 
+> > > > > > > 1a28d50 (init:gestion de reservation de livres)
 
- Le probleme avec ce code est juste le meme livre va etre reservé 2 fois , puisque le programme verifie bien si le livre choisi est disponible ou pas , mais l'action de verification et d'ajout sont pas proteger ce qui fait que si 2 requete vienne au meme moment , elle vont s'executer toute 2 au meme moment . pour eviter ca en laravel on peut une utiliser la function transaction fournit par DB
->>>>>>> 1a28d50 (init:gestion de reservation de livres)
+`CONNEXION A L'INTERFACE`
+
+Email:admin@yopmail.com
+Password:Admin1admin2
+
+**_NB: Avoir une connexion internet pour la fluidité (Envoie de mail au lecteur et administrateur lors de la creation du compte avec les informations de connexions)_**
