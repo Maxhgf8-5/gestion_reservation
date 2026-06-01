@@ -1,84 +1,159 @@
-<<<<<<< HEAD
+# GestBiblio — Système de gestion des réservations
 
-# gestion_reservation
+Application fullstack de réservation de livres en bibliothèque.
 
-# une app web de reservation de livres (laravel+react)
+**Stack** : Laravel 10 · React · PostgreSQL
 
-**System de gestion des reservations**
-_Application fullstack - Backend laravel / Frontend React /PostgreSql_
+---
 
-\*\_\_Structure du projet\_\_\_
+## Prérequis
 
-gestion_reservation--->back(api rest laravel 10)+front (react)
+Avant de commencer, assurez-vous d'avoir installé :
 
-\*_*Outils technique*_
+- PHP >= 8.2 et Composer
+- Node.js >= 18 et npm
+- PostgreSQL
+- Git
 
-**avoir installer :**
+---
 
-php au moins 8.2 et le composer
-node.js au moins 18 et le npm
-postgreSql
-git
+## Mise en place de la base de données
 
-**_Base de donnee_**
-creer une base de donnee (gestion_bibliotheque)
-1-dans le terminal (windows) taper les commande -`set  PGPASSWORD=votre mot_de_passe` -`psql -h localhost -p le_port(5432 par defaut) -U postgres(le username par defaut)` -`create database "gestion_bibliotheque"` -`\l` pour voir la DB creer
+Créer la base de données `gestion_bibliotheque` :
 
-**_Installer laravel_**
-faire `cd backend` puis `cd GestionBiblio` et taper
-`composer install`
-`cp .env.example .env`
-`php artisan key:generate`
--modifier le fichier .env
-**DB_CONNECTION=pgsql**
-**DB_HOST=127.0.0.1**
-**DB_PORT=5432(par defaut)**
-**DB_USERNAME=postgres(par defaut)**
-**DB_PASSWORD=votre_mot_de_psse**
+```bash
+# Connexion à PostgreSQL
+set PGPASSWORD=votre_mot_de_passe         # Windows
+psql -h localhost -p 5432 -U postgres
 
--Lancer les migration
-`php artisan migrate --seed`
-`php artisan serve`
+# Dans le shell PostgreSQL
+CREATE DATABASE "gestion_bibliotheque";
+\l   -- vérifier la création
+\q   -- quitter
+```
 
-normalement il tourne sur le **_localhost:8000_**
+---
 
-**\*\*\***Installer le front**\*\***
+## Installation du backend (Laravel)
 
-dans le terminal `cd frontent`, `cd mon-projet`
-creer un fichier .env a la racine du dossier mon-projet s'il existe pas , coller ce code
-**REACT_APP_API_URL=http://localhost:8000**
-puis un autre fichier api.js dans src s'il n'existe pas et coller :
-**import axios from "axios";**
-**const api = axios.create({**
-**baseURL: process.env.REACT_APP_API_URL + "/api",** //
-**});**
+```bash
+cd backend/GestionBiblio
 
-**export default api;**
-**_NB_**: vous devez installer le dom-router et axios
-taper npm start puis lancer le server
-il va normalement tourner sur du localhost:3000
+composer install
+cp .env.example .env
+php artisan key:generate
+```
 
-**\***Stack technique**\*
-il s'agit d'une app web de gestion de reservation de livre
--techonologie utilisé:
-**Backend\*\*:laravel
-c'est un frame php rapide a developper ,car il fournit un routing, des orm ,des validation, il a une arhitecture tres simple MVC, avec une manipulation simple avec la BD sans ecrire des requete sql brute, tres securisé , il est pratique pour des cas d'API rest : Notre cas
+Modifier le fichier `.env` :
 
-**Front**: React
-une librairie js avec une interface dynamique , sans recharger la page il arrive a mettre a jours ces composents qui sont d'ailleur reuitiisable . une experience utilisateur tres fluide
+```env
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=gestion_bibliotheque
+DB_USERNAME=postgres
+DB_PASSWORD=votre_mot_de_passe
+```
 
-**Base de D**: PostgreSql
-robuste fiable pour des donnée relationnelle comme notre cas ,tres performant en requete complexe, gratuit et est supporter par laravel
+Lancer les migrations et le serveur :
 
-Exercice
+```bash
+php artisan migrate --seed
+php artisan serve
+```
 
-Le probleme avec ce code est juste le meme livre va etre reservé 2 fois , puisque le programme verifie bien si le livre choisi est disponible ou pas , mais l'action de verification et d'ajout sont pas proteger ce qui fait que si 2 requete vienne au meme moment , elle vont s'executer toute 2 au meme moment . pour eviter ca en laravel on peut une utiliser la function transaction fournit par DB
+> Le backend tourne sur **http://localhost:8000**
 
-> > > > > > > 1a28d50 (init:gestion de reservation de livres)
+---
 
-`CONNEXION A L'INTERFACE`
+## Installation du frontend (React)
 
-Email:admin@yopmail.com
-Password:Admin1admin2
+```bash
+cd frontend/mon-projet
+```
 
-**_NB: Avoir une connexion internet pour la fluidité (Envoie de mail au lecteur et administrateur lors de la creation du compte avec les informations de connexions)_**
+Installer les dépendances et démarrer :
+
+```bash
+npm install
+npm start
+```
+
+> Le frontend tourne sur **http://localhost:3000**
+
+---
+
+## Connexion à l'interface
+
+pour migrer l'administrateur
+
+```bash
+php artisan db:seed --class=AdminSeeder
+```
+
+pour migrer les roles et permissions
+
+```bash
+php artisan db:seed --class=RoleSeeder
+```
+
+**Les identidiants**
+Email admin@yopmail.com  
+ Mot de passe : Admin1admin2
+
+> **Note** : Une connexion internet est requise pour l'envoi d'emails (confirmation de compte avec identifiants,utiliser les mail jetable si possible : [https://yopmail.com/fr/]).
+
+## Stack technique
+
+### Backend — Laravel
+
+Framework PHP avec architecture MVC, routing intégré, ORM Eloquent, validation et authentification. Idéal pour les API REST sécurisées.
+
+### Frontend — React
+
+Librairie JavaScript pour des interfaces dynamiques avec composants réutilisables et mise à jour sans rechargement de page.
+
+### Base de données — PostgreSQL
+
+SGBD relationnel robuste, performant sur les requêtes complexes, entièrement supporté par Laravel.
+
+---
+
+## Gestion des race conditions
+
+Un problème classique de concurrence : deux requêtes simultanées peuvent réserver le même livre si la vérification de disponibilité et l'insertion ne sont pas atomiques.
+
+**Solution** : transaction avec verrou pessimiste via Laravel.
+
+```php
+DB::transaction(function () use ($livreId, $lecteurId) {
+    $livre = Livre::lockForUpdate()->findOrFail($livreId);
+
+    if ($livre->statut !== 'disponible') {
+        throw new \Exception('Livre non disponible.');
+    }
+
+    $livre->statut = 'reservé';
+    $livre->save();
+
+    Reservation::create([
+        'livre_id'   => $livreId,
+        'lecteur_id' => $lecteurId,
+        'date_debut' => now(),
+    ]);
+});
+```
+
+`DB::transaction()` garantit l'atomicité et `lockForUpdate()` bloque les lectures simultanées jusqu'à la fin de la transaction.
+
+---
+
+## Structure du projet
+
+```
+gestion_reservation/
+├── backend/
+│        # API REST Laravel
+└── frontend/
+         # Application React
+```
